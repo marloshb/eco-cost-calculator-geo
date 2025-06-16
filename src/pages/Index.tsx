@@ -5,6 +5,9 @@ import { CalculationResults } from '../components/CalculationResults';
 import { OpportunitiesPanel } from '../components/OpportunitiesPanel';
 import { Header } from '../components/Header';
 import { StatsOverview } from '../components/StatsOverview';
+import { Button } from '@/components/ui/button';
+import { BarChart3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [selectedArea, setSelectedArea] = useState<number>(0);
@@ -95,6 +98,19 @@ const Index = () => {
             selectedActivity={selectedActivity}
             results={calculationResults}
           />
+        </div>
+
+        {/* Botão para Comparação de Setores */}
+        <div className="mb-6 text-center">
+          <Link to="/comparison">
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3">
+              <BarChart3 className="h-5 w-5 mr-2" />
+              Comparar Múltiplos Setores
+            </Button>
+          </Link>
+          <p className="text-sm text-muted-foreground mt-2">
+            Compare impactos de diferentes atividades econômicas na mesma área
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
