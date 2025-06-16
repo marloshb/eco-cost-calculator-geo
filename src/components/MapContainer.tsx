@@ -96,40 +96,44 @@ export const MapContainer = ({ onAreaCalculated }: MapContainerProps) => {
           }
         });
 
-        // Add draw control button
-        const drawButton = L.control({ position: 'topright' });
-        drawButton.onAdd = function() {
-          const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-          div.style.backgroundColor = '#22c55e';
-          div.style.backgroundImage = 'none';
-          div.style.width = '40px';
-          div.style.height = '40px';
-          div.style.cursor = 'pointer';
-          div.style.display = 'flex';
-          div.style.alignItems = 'center';
-          div.style.justifyContent = 'center';
-          div.style.color = 'white';
-          div.style.fontSize = '16px';
-          div.innerHTML = '✏️';
-          div.title = 'Desenhar Polígono';
-          
-          div.onclick = function() {
-            if (!isDrawing) {
-              startDrawing();
-              div.style.backgroundColor = '#ef4444';
-              div.innerHTML = '⏹️';
-              div.title = 'Clique no mapa para adicionar pontos (mínimo 3)';
-            } else {
-              finishDrawing();
-              div.style.backgroundColor = '#22c55e';
-              div.innerHTML = '✏️';
-              div.title = 'Desenhar Polígono';
-            }
-          };
-          
-          return div;
-        };
-        drawButton.addTo(mapInstance);
+        // Create custom control class
+        const DrawControl = L.Control.extend({
+          onAdd: function() {
+            const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            div.style.backgroundColor = '#22c55e';
+            div.style.backgroundImage = 'none';
+            div.style.width = '40px';
+            div.style.height = '40px';
+            div.style.cursor = 'pointer';
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.justifyContent = 'center';
+            div.style.color = 'white';
+            div.style.fontSize = '16px';
+            div.innerHTML = '✏️';
+            div.title = 'Desenhar Polígono';
+            
+            div.onclick = function() {
+              if (!isDrawing) {
+                startDrawing();
+                div.style.backgroundColor = '#ef4444';
+                div.innerHTML = '⏹️';
+                div.title = 'Clique no mapa para adicionar pontos (mínimo 3)';
+              } else {
+                finishDrawing();
+                div.style.backgroundColor = '#22c55e';
+                div.innerHTML = '✏️';
+                div.title = 'Desenhar Polígono';
+              }
+            };
+            
+            return div;
+          }
+        });
+
+        // Add the custom control to the map
+        const drawControl = new DrawControl({ position: 'topright' });
+        mapInstance.addControl(drawControl);
 
         setMap(mapInstance);
         setIsMapLoaded(true);
