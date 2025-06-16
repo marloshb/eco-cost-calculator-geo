@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { MapContainer } from '../components/MapContainer';
 import { ActivitySelector } from '../components/ActivitySelector';
@@ -112,7 +111,11 @@ const Index = () => {
             {calculationResults && (
               <>
                 <CalculationResults results={calculationResults} />
-                <OpportunitiesPanel opportunities={calculationResults.opportunities} />
+                <OpportunitiesPanel 
+                  opportunities={calculationResults.opportunities} 
+                  results={calculationResults}
+                  coordinates={coordinates}
+                />
               </>
             )}
           </div>

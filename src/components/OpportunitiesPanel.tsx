@@ -1,8 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Coins, TreePine, Droplets, Camera, TrendingUp, ExternalLink } from 'lucide-react';
+import { Coins, TreePine, Droplets, Camera, TrendingUp, ExternalLink, FileText, Download } from 'lucide-react';
+import { reportGenerator } from './ReportGenerator';
+import { useState } from 'react';
 
 interface OpportunitiesPanelProps {
   opportunities: {
@@ -11,9 +12,24 @@ interface OpportunitiesPanelProps {
     ecoturismo: number;
     carbonCredits: number;
   };
+  results?: {
+    totalLoss: number;
+    impactedServices: string[];
+    compliance: {
+      codigoFlorestal: string;
+      emissoes: string;
+      mercadoCarbono: string;
+    };
+    area: number;
+    activity: string;
+    co2Emissions: number;
+  };
+  coordinates?: [number, number][];
 }
 
-export const OpportunitiesPanel = ({ opportunities }: OpportunitiesPanelProps) => {
+export const OpportunitiesPanel = ({ opportunities, results, coordinates = [] }: OpportunitiesPanelProps) => {
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -21,6 +37,35 @@ export const OpportunitiesPanel = ({ opportunities }: OpportunitiesPanelProps) =
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  const handleGenerateReport = async () => {
+    if (!results) {
+      alert('Nenhum resultado disponível para gerar relatório');
+      return;
+    }
+
+    setIsGeneratingReport(true);
+    try {
+      const reportData = {
+        area: results.area,
+        activity: results.activity,
+        totalLoss: results.totalLoss,
+        impactedServices: results.impactedServices,
+        compliance: results.compliance,
+        co2Emissions: results.co2Emissions,
+        opportunities,
+        coordinates
+      };
+
+      await reportGenerator.generateReport(reportData);
+      console.log('Relatório gerado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
+      alert('Erro ao gerar relatório. Tente novamente.');
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   const opportunityData = [
@@ -153,13 +198,46 @@ export const OpportunitiesPanel = ({ opportunities }: OpportunitiesPanelProps) =
         ))}
         
         <div className="pt-4 border-t">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-3">
+          <div className="text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
               Compare os custos de perdas com as oportunidades de receita para tomar decisões sustentáveis
             </p>
-            <Button className="w-full bg-gradient-eco hover:opacity-90">
-              Gerar Relatório Completo
-            </Button>
+            
+            <div className="grid grid-cols-1 gap-2">
+              <Button 
+                onClick={handleGenerateReport}
+                disabled={isGeneratingReport || !results}
+                className="w-full bg-gradient-eco hover:opacity-90"
+              >
+                {isGeneratingReport ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Gerando Relatório...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Gerar Relatório Completo (PDF)
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                disabled={!results}
+                onClick={() => {
+                  if (results) {
+                    const summary = `Análise Ambiental - Área: ${results.area.toFixed(2)}ha | Atividade: ${results.activity} | Perdas: ${formatCurrency(results.totalLoss)}/ano | Oportunidades: ${formatCurrency(totalOpportunities)}/ano`;
+                    navigator.clipboard.writeText(summary);
+                    alert('Resumo copiado para a área de transferência!');
+                  }
+                }}
+              >
+                <Download className="h-3 w-3 mr-1" />
+                Copiar Resumo
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
